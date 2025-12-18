@@ -1,0 +1,125 @@
+from django.db import models
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.templatetags.static import static
+
+
+class Teacher(models.Model):
+    full_name = models.CharField(max_length=255)
+    bio = models.TextField(blank=True)
+    avatar = models.ImageField(upload_to='instructors/', blank=True, null=True)
+    expertise = models.CharField(max_length=255, help_text="Masalan: Python, Frontend, Data Science")
+    experience_years = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return self.full_name
+
+
+class Subject(models.Model):
+    title = models.CharField(max_length=200)
+    slug = models.SlugField(max_length=200, unique=True)
+
+    class Meta:
+        ordering = ['title']
+
+    def __str__(self):
+        return self.title
+    
+    
+class Course(models.Model):
+    owner = models.ForeignKey(Teacher, related_name='courses', on_delete=models.SET_NULL, null=True)
+    subject = models.ForeignKey(Subject, related_name='courses', on_delete=models.CASCADE)
+    title = models.CharField(max_length=200)
+    slug = models.SlugField(max_length=200, unique=True)
+    overview = models.TextField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    image = models.ImageField(upload_to='courses/', blank=True, null=True)
+    price = models.DecimalField(
+        max_digits=6, 
+        decimal_places=2, 
+        default=0.00, 
+        help_text="Kurs narxi (Masalan: 49.99)"
+    )
+    duration_hours = models.FloatField(
+        default=0.0, 
+        help_text="Kursning umumiy davomiyligi (soatlarda)"
+    )
+    skill_level = models.CharField(
+        max_length=50, 
+        default='Boshlang\'ich', 
+        choices=[('Boshlang\'ich', 'Boshlang\'ich'), ('O\'rta', 'O\'rta'), ('Yuqori', 'Yuqori')]
+    )
+    rating = models.FloatField(default=0.0)
+    total_reviews = models.IntegerField(default=0)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    @property
+    def get_image_url(self):
+        if not self.image:
+            return static('img/not_found_image.jpg')
+        return self.image.url
+    
+    @property
+    def total_lectures(self):
+        return Content.objects.filter(module__course=self).count()
+        
+    def __str__(self):
+        return self.title
+
+
+class Module(models.Model):
+    course = models.ForeignKey(Course, related_name='modules', on_delete=models.CASCADE)
+    title = models.CharField(max_length=200)
+    overview = models.TextField(null=True, blank=True)
+
+    def __str__(self):
+        return self.title
+        
+    
+class Content(models.Model):
+    module = models.ForeignKey(Module, related_name='contents', on_delete=models.CASCADE)
+    content_type = models.ForeignKey(
+        ContentType, 
+        on_delete=models.CASCADE,
+        limit_choices_to = {
+            "model__in":(
+                'text',
+                'video',
+                'image',
+                'file'
+            )
+        }
+    )
+    object_id = models.PositiveIntegerField()
+    item = GenericForeignKey('content_type', 'object_id',)
+
+
+class ItemBase(models.Model):
+    owner = models.ForeignKey(Teacher, on_delete=models.SET_NULL, null=True)
+    title = models.CharField(max_length=200)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        abstract = True
+
+
+class Text(ItemBase):
+    content = models.TextField()
+
+
+class File(ItemBase):
+    file = models.FileField(upload_to='files')
+
+
+class Video(ItemBase):
+    url = models.URLField()
+
+
+class Image(ItemBase):
+    image = models.ImageField(upload_to='images')
+
