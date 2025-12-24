@@ -143,7 +143,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'upskill',
     'course',
+    'user',
 ]
+
+AUTH_USER_MODEL = 'user.CustomUser'
 
 # Middleware
 MIDDLEWARE = [
@@ -205,3 +208,13 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_USE_TLS = True
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'lord001gin@gmail.com'
+EMAIL_HOST_PASSWORD = 'ivrc ikt asff qwsff'
+default_auto_field = EMAIL_HOST_USER

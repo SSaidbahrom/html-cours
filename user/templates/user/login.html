@@ -1,0 +1,118 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en-US" dir="ltr">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Login</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="{% static 'user/vendors/bootstrap/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'user/assets/css/theme.min.css' %}" rel="stylesheet">
+    <style>
+        .login-section {
+            min-height: 100vh;
+            display: flex;
+        }
+        .login-img-col {
+            flex: 1;
+            position: relative;
+        }
+        .login-img-col img {
+            width: 100%;
+            height: 100vh;
+            object-fit: cover;
+        }
+        .login-form-col {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        .card {
+            width: 100%;
+            max-width: 400px;
+            padding: 2rem;
+        }
+        .home-link {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+        }
+        @media (max-width: 992px) {
+            .login-section {
+                flex-direction: column;
+            }
+            .login-img-col {
+                height: 300px;
+            }
+            .login-img-col img {
+                height: 100%;
+            }
+            .home-link {
+                position: static;
+                margin-bottom: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-section">
+        <!-- Chapdagi rasm -->
+        <div class="login-img-col d-none d-lg-block">
+            <img src="{% static 'user/assets/img/login-register.jpg' %}" alt="Register Image">
+            <!-- Namespace to'g'ri bo'lishi kerak -->
+            <a href="{% url 'upskill:index' %}" class="btn btn-primary home-link">Home</a>
+        </div>
+
+        <!-- O'ngdagi form -->
+        <div class="login-form-col">
+            <div class="card shadow-sm">
+                <h3 class="text-center mb-4">Login</h3>
+
+                {% if form.errors %}
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                            <div class="alert alert-danger">
+                                <strong>{{ error|escape }}</strong>
+                            </div>
+                        {% endfor %}
+                    {% endfor %}
+                    {% for error in form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            <strong>{{ error|escape }}</strong>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <form method="post" action="{% url 'user:login_page' %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label" for="username">Username or Email</label>
+                        <input class="form-control" name="username" type="text" id="username" autocomplete="on">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="password">Password</label>
+                        <input class="form-control" name="password" type="password" id="password" autocomplete="on">
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input class="form-check-input" type="checkbox" id="remember" name="remember">
+                        <label class="form-check-label" for="remember">Remember me</label>
+                    </div>
+                    <div class="mb-3">
+                        <button class="btn btn-primary w-100" type="submit">Login</button>
+                    </div>
+                    <div class="text-center">
+                        Don't have an account? <a href="{% url 'user:register_page' %}">Register</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="{% static 'user/vendors/bootstrap/bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>
